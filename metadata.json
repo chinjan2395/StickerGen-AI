@@ -1,0 +1,5 @@
+{
+  "name": "StickerGen.ai",
+  "description": "Turn any photo into a custom die-cut sticker that matches the personality using Gemini 2.5.",
+  "requestFramePermissions": []
+}
