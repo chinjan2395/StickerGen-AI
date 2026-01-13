@@ -20,14 +20,16 @@ export const generateSticker = async (
   const model = "gemini-2.5-flash-image";
 
   // Engineered prompt for sticker generation
+  // Transform this image into a high-quality, stylized die-cut chibi sticker character which can be used as Whatsapp sticker.
+  // - Vector illustration cute chibi sticker art.
   const promptText = `
-    Transform this image into a high-quality, stylized die-cut sticker character.
+    Automatically generate a 3x3 grid of stickers, each depicting a different mood (e.g., angry, happy, sad, crying, laughing, kissing with heart emoji, proud with black sunglasses, annoyed etc.) from the uploaded photo.
     
     Style requirements:
-    - Modern vector illustration or semi-realistic sticker art.
-    - ACCURATELY CAPTURE the subject's body type and proportions. Do NOT make them chubby, round, or chibi-style unless the original image reflects that.
+    - Vector illustration cute chibi sticker art.
+    - ACCURATELY CAPTURE the subject's body type and proportions.
     - Focus heavily on capturing the unique PERSONALITY, attitude, and facial expression of the subject.
-    - Add a thick white die-cut border around the character.
+    - Add a semi-thick white die-cut border around the character.
     - The background MUST be a solid white color (effectively transparent for stickers).
     
     Specific details:

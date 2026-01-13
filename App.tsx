@@ -90,11 +90,11 @@ const App: React.FC = () => {
       </nav>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-6 sm:px-8 mt-12">
+      <main className="max-w-7xl mx-auto px-4 sm:px-8 mt-8 md:mt-12">
         
         {/* Intro */}
-        <div className="text-center mb-16 space-y-5">
-          <h1 className="text-4xl md:text-5xl font-bold text-[#4A4A6A] tracking-tight leading-tight">
+        <div className="text-center mb-10 md:mb-16 space-y-5">
+          <h1 className="text-3xl md:text-5xl font-bold text-[#4A4A6A] tracking-tight leading-tight">
             Turn photos into <span className="relative inline-block">
               expressive
               <span className="absolute bottom-1 left-0 w-full h-3 bg-[#FFDAB9]/40 -z-10 rounded-full transform -rotate-1"></span>
@@ -113,11 +113,11 @@ const App: React.FC = () => {
         )}
 
         {/* Workspace Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-y-8 lg:gap-10 items-start">
           
           {/* Left Column: Input */}
-          <div className="lg:col-span-5 space-y-8">
-            <div className="bg-white p-2 rounded-[2rem] shadow-sm border border-[#E6E6FA]">
+          <div className="lg:col-span-5 space-y-6 md:space-y-8">
+            <div className="bg-white p-1.5 md:p-2 rounded-[2rem] shadow-sm border border-[#E6E6FA]">
                 <ImageUploader 
                     onImageSelected={handleImageSelected} 
                     selectedImage={state.originalImage} 
@@ -156,20 +156,20 @@ const App: React.FC = () => {
         </div>
 
         {/* Tips Section */}
-        <div className="mt-24 border-t border-[#E6E6FA] pt-12 pb-12">
+        <div className="mt-16 md:mt-24 border-t border-[#E6E6FA] pt-12 pb-12">
             <h3 className="text-center text-[#8E8EA8] font-semibold uppercase tracking-widest text-xs mb-10">Pro Tips for Perfect Results</h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <div className="bg-white p-8 rounded-3xl shadow-sm border border-[#F0F0FF] hover:border-[#FFDAB9] transition-colors">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
+                <div className="bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-[#F0F0FF] hover:border-[#FFDAB9] transition-colors">
                     <div className="w-12 h-12 bg-[#F5F5FF] rounded-2xl flex items-center justify-center text-[#9370DB] mb-5 font-bold text-xl">1</div>
                     <h4 className="font-semibold text-[#4A4A6A] mb-3 text-lg">Clear Subjects</h4>
                     <p className="text-[#8E8EA8] text-sm leading-relaxed">Use photos where the face is clearly visible. Good lighting helps the AI capture the micro-expressions.</p>
                 </div>
-                <div className="bg-white p-8 rounded-3xl shadow-sm border border-[#F0F0FF] hover:border-[#FFDAB9] transition-colors">
+                <div className="bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-[#F0F0FF] hover:border-[#FFDAB9] transition-colors">
                     <div className="w-12 h-12 bg-[#FFF5EE] rounded-2xl flex items-center justify-center text-[#E9967A] mb-5 font-bold text-xl">2</div>
                     <h4 className="font-semibold text-[#4A4A6A] mb-3 text-lg">Describe Mood</h4>
                     <p className="text-[#8E8EA8] text-sm leading-relaxed">Try "confident smile", "laughing hysterically", or "skeptical brow raise" to guide the artistic style.</p>
                 </div>
-                <div className="bg-white p-8 rounded-3xl shadow-sm border border-[#F0F0FF] hover:border-[#FFDAB9] transition-colors">
+                <div className="bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-[#F0F0FF] hover:border-[#FFDAB9] transition-colors">
                     <div className="w-12 h-12 bg-[#F0FFF4] rounded-2xl flex items-center justify-center text-[#66CDAA] mb-5 font-bold text-xl">3</div>
                     <h4 className="font-semibold text-[#4A4A6A] mb-3 text-lg">Clean Output</h4>
                     <p className="text-[#8E8EA8] text-sm leading-relaxed">The AI generates a clean white die-cut border automatically, making it ready for instant messaging use.</p>
