@@ -1,6 +1,6 @@
 export interface StickerState {
   originalImage: string | null;
-  generatedImage: string | null;
+  generatedStickers: string[];
   prompt: string;
   isGenerating: boolean;
   error: string | null;
@@ -20,8 +20,7 @@ export interface StickerControlsProps {
 }
 
 export interface ResultDisplayProps {
-  generatedImage: string | null;
+  generatedStickers: string[];
   isGenerating: boolean;
-  onDownload: () => void;
   onReset: () => void;
 }

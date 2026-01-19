@@ -9,7 +9,7 @@ import { Sparkles, Heart } from 'lucide-react';
 const App: React.FC = () => {
   const [state, setState] = useState<StickerState>({
     originalImage: null,
-    generatedImage: null,
+    generatedStickers: [],
     prompt: '',
     isGenerating: false,
     error: null,
@@ -19,7 +19,7 @@ const App: React.FC = () => {
     setState(prev => ({
       ...prev,
       originalImage: base64 || null,
-      generatedImage: null, // Reset generated result when new image uploaded
+      generatedStickers: [], // Reset generated result when new image uploaded
       error: null
     }));
   };
@@ -34,10 +34,10 @@ const App: React.FC = () => {
     setState(prev => ({ ...prev, isGenerating: true, error: null }));
 
     try {
-      const result = await generateSticker(state.originalImage, state.prompt);
+      const stickers = await generateSticker(state.originalImage, state.prompt);
       setState(prev => ({
         ...prev,
-        generatedImage: result,
+        generatedStickers: stickers,
         isGenerating: false
       }));
     } catch (err: any) {
@@ -49,21 +49,10 @@ const App: React.FC = () => {
     }
   };
 
-  const handleDownload = () => {
-    if (!state.generatedImage) return;
-    
-    const link = document.createElement('a');
-    link.href = state.generatedImage;
-    link.download = `sticker-gen-${Date.now()}.png`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
   const handleReset = () => {
       setState(prev => ({
           ...prev,
-          generatedImage: null,
+          generatedStickers: [],
           prompt: ''
       }));
   }
@@ -146,9 +135,8 @@ const App: React.FC = () => {
           {/* Right Column: Result */}
           <div className="lg:col-span-5">
             <ResultDisplay 
-              generatedImage={state.generatedImage} 
+              generatedStickers={state.generatedStickers} 
               isGenerating={state.isGenerating} 
-              onDownload={handleDownload}
               onReset={handleReset}
             />
           </div>
