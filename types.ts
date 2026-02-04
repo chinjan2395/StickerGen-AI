@@ -1,5 +1,5 @@
 export interface StickerState {
-  originalImage: string | null;
+  originalImages: string[];
   generatedStickers: string[];
   prompt: string;
   isGenerating: boolean;
@@ -7,8 +7,8 @@ export interface StickerState {
 }
 
 export interface ImageUploaderProps {
-  onImageSelected: (base64: string) => void;
-  selectedImage: string | null;
+  onImagesChange: (images: string[]) => void;
+  selectedImages: string[];
 }
 
 export interface StickerControlsProps {

@@ -31,8 +31,7 @@ const sliceImage = async (base64Image: string): Promise<string[]> => {
         for (let x = 0; x < cols; x++) {
           ctx.clearRect(0, 0, pieceWidth, pieceHeight);
           
-          // Fixed: Removed the margin/zoom logic that was causing cropping.
-          // Now extracting the exact full 1/9th tile without cutting edges.
+          // Extract the full 1/9th tile
           ctx.drawImage(
             img,
             x * pieceWidth, y * pieceHeight, pieceWidth, pieceHeight, // Source
@@ -49,71 +48,103 @@ const sliceImage = async (base64Image: string): Promise<string[]> => {
 };
 
 /**
- * Generates a set of 9 stickers based on an input image and a mood description.
+ * Generates a set of 9 stickers based on input images (up to 3) and a mood description.
  */
 export const generateSticker = async (
-  imageBase64: string,
+  imageArray: string[],
   moodDescription: string
 ): Promise<string[]> => {
   if (!apiKey) {
     throw new Error("API Key is missing.");
   }
 
-  // Remove header if present to get raw base64 data
-  const base64Data = imageBase64.split(',')[1] || imageBase64;
+  // NOTE: 'gemini-2.5' does not exist yet. Assuming you mean 2.0-flash-exp or 1.5-pro.
+  // 1.5-Pro is often better for complex multi-character instruction following.
+  const model = "gemini-2.5-flash-image"; 
+  const numSubjects = imageArray.length;
+  const isMulti = numSubjects > 1;
 
-  const model = "gemini-2.5-flash-image";
+  // --- STEP 1: DYNAMIC PARTS CONSTRUCTION (INTERLEAVING) ---
+  const parts: any[] = [];
 
-  // Engineered prompt for sticker generation with strict grid enforcement and identity preservation
+  // Loop through images and "bind" them to specific identities (Person A, B, C)
+  imageArray.forEach((img, index) => {
+      const personLabel = String.fromCharCode(65 + index); // Generates 'A', 'B', 'C'
+      const base64Data = img.split(',')[1] || img;
+
+      // 1. Strict Identity Label (Text)
+      parts.push({ 
+          text: `REFERENCE IMAGE ${index + 1} (This is Person ${personLabel}). \nLook at this face specifically for Character ${personLabel}.` 
+      });
+
+      // 2. The Image Data
+      parts.push({
+          inlineData: {
+              data: base64Data,
+              mimeType: "image/jpeg", // Ensure your input is actually consistent, or detect mime type
+          }
+      });
+  });
+
+  // --- STEP 2: MAIN INSTRUCTION PROMPT ---
+  // We remove the "Inputs" section from here because we handled it above manually.
   const promptText = `
-    Task: Create a "Sprite Sheet" containing EXACTLY 9 unique stickers arranged in a perfect 3x3 grid.
-    Subject: The person in the uploaded photo.
+    ROLE: Expert Character Designer & Sticker Artist.
 
-    IDENTITY & STYLE INSTRUCTIONS (VERY IMPORTANT):
-    1.  **Caricature Likeness**: The stickers MUST look like the specific person in the photo. Capture their unique face shape, nose, eyes, and skin tone.
-    2.  **Key Features**: You MUST Preserve their exact hairstyle, hair color, glasses (if any), facial hair (if any), and clothing style. Do not turn them into a generic anime character.
-    3.  **Style**: High-quality, expressive "Chibi" or "Kawaii" sticker art. Thick lines, vibrant colors.
-    4.  **Format**: Add a thick white die-cut border around the character contour.
+    TASK: Generate a "Sprite Sheet" image with a 3x3 grid (9 total stickers).
 
-    LAYOUT INSTRUCTIONS (CRITICAL FOR CROPPING):
-    1.  **Strict 3x3 Grid**: Generate a single square image divided into 3 rows and 3 columns.
-    2.  **Safety Margin**: Draw the characters slightly SMALLER. They should occupy only about 65-70% of the grid cell size.
-    3.  **Padding**: REQUIRED. Leave LARGE amount of whitespace buffer around every sticker to ensure no part of the sticker touches the grid edges.
-    4.  **Centering**: Perfectly center each character in its 1/9th section.
-    5.  **No Artifacts**: Background must be pure solid white. No grid lines, no text, no numbers, no titles.
+    CONTEXT:
+    - I have provided ${numSubjects} reference images above.
+    ${isMulti 
+      ? `- You must treat them as ${numSubjects} DISTINCT INDIVIDUALS.` 
+      : '- This is the sole character.'
+    }
 
-    Expressions Grid (Left to Right, Top to Bottom):
-    1. Waving / Hello
-    2. Laughing Hard (ROFL)
-    3. Cool / Sunglasses
-    4. Heart Eyes / In Love
-    5. Crying / Sad
-    6. Angry / Fuming
-    7. Confused / Question marks
-    8. Celebrating / Party
-    9. ${moodDescription ? moodDescription : 'Surprised / Shocked'}
+    STRICT IDENTITY MAPPING (CRITICAL):
+    1. **Mapping**:
+       - The character drawn as "Person A" MUST look like Reference Image 1 (Above).
+       - The character drawn as "Person B" MUST look like Reference Image 2 (Above).
+       ${numSubjects > 2 ? '- The character drawn as "Person C" MUST look like Reference Image 3 (Above).' : ''}
+    2. **Differentiation**: 
+       - It is a FAILURE if Person A and Person B share the same face. 
+       - Draw different hairstyles, eye shapes, and accessories exactly as seen in their specific reference photos.
 
-    Return ONLY the image sprite sheet.
+    COMPOSITION RULES:
+    1. **3x3 Grid Layout**: Single image, 9 equal cells.
+    2. **Group Interaction**: ${isMulti 
+        ? `Each cell must show ALL ${numSubjects} characters interacting together.` 
+        : 'Center the character in the cell.'}
+    3. **Style**: Chibi/Kawaii Sticker Art. Big heads, small bodies. White die-cut border. Solid white background.
+
+    SCENES (Generate these 9 variations):
+    1. ${isMulti ? 'Group: Waving Hello' : 'Waving Hello'}
+    2. ${isMulti ? 'Group: Laughing Hysterically' : 'Laughing Hysterically'}
+    3. ${isMulti ? 'Group: Wearing Sunglasses' : 'Cool with Sunglasses'}
+    4. ${isMulti ? 'Group: Hugging (Cheeks pressed together)' : 'Heart Eyes'}
+    5. ${isMulti ? 'Group: Crying/Sad' : 'Crying'}
+    6. ${isMulti ? 'Group: Angry/Fuming' : 'Angry'}
+    7. ${isMulti ? 'Group: Confused (? marks)' : 'Confused'}
+    8. ${isMulti ? 'Group: Partying' : 'Party'}
+    9. ${moodDescription ? (isMulti ? `Group: ${moodDescription}` : moodDescription) : 'Surprised'}
+
+    FAILURE CONDITIONS:
+    - Failure if Person A and Person B look identical.
+    - Failure if any sticker shows only 1 person (when multi-mode is on).
+    - Failure if background is not white.
+
+    Return ONLY the generated sprite sheet image.
   `;
+
+  // Add the main instructions at the end of the conversation
+  parts.push({ text: promptText });
 
   try {
     const response = await ai.models.generateContent({
       model: model,
       contents: {
-        parts: [
-          {
-            text: promptText,
-          },
-          {
-            inlineData: {
-              data: base64Data,
-              mimeType: "image/jpeg",
-            },
-          },
-        ],
+        parts: parts, // We pass our constructed interleaved array here
       },
       config: {
-        // Enforce square aspect ratio to encourage 3x3 symmetry
         imageConfig: {
             aspectRatio: "1:1"
         }
@@ -126,11 +157,10 @@ export const generateSticker = async (
       throw new Error("No response from Gemini.");
     }
 
-    const parts = candidates[0].content.parts;
+    const contentParts = candidates[0].content.parts;
     let generatedImageBase64 = "";
 
-    // Iterate to find the image part
-    for (const part of parts) {
+    for (const part of contentParts) {
       if (part.inlineData && part.inlineData.data) {
         generatedImageBase64 = part.inlineData.data;
         break;
@@ -138,7 +168,7 @@ export const generateSticker = async (
     }
 
     if (!generatedImageBase64) {
-      const textPart = parts.find(p => p.text);
+      const textPart = contentParts.find(p => p.text);
       if (textPart) {
         throw new Error(`Generation failed: ${textPart.text}`);
       }

@@ -8,18 +8,18 @@ import { Sparkles, Heart } from 'lucide-react';
 
 const App: React.FC = () => {
   const [state, setState] = useState<StickerState>({
-    originalImage: null,
+    originalImages: [],
     generatedStickers: [],
     prompt: '',
     isGenerating: false,
     error: null,
   });
 
-  const handleImageSelected = (base64: string) => {
+  const handleImagesChange = (images: string[]) => {
     setState(prev => ({
       ...prev,
-      originalImage: base64 || null,
-      generatedStickers: [], // Reset generated result when new image uploaded
+      originalImages: images,
+      generatedStickers: [], // Reset generated result when images change
       error: null
     }));
   };
@@ -29,12 +29,12 @@ const App: React.FC = () => {
   };
 
   const handleGenerate = async () => {
-    if (!state.originalImage) return;
+    if (state.originalImages.length === 0) return;
 
     setState(prev => ({ ...prev, isGenerating: true, error: null }));
 
     try {
-      const stickers = await generateSticker(state.originalImage, state.prompt);
+      const stickers = await generateSticker(state.originalImages, state.prompt);
       setState(prev => ({
         ...prev,
         generatedStickers: stickers,
@@ -90,7 +90,7 @@ const App: React.FC = () => {
             </span> stickers.
           </h1>
           <p className="text-lg text-[#8E8EA8] max-w-2xl mx-auto font-light leading-relaxed">
-            Upload a photo, describe a mood, and create a custom die-cut sticker that captures the unique personality.
+            Upload up to 3 photos, describe a mood, and create a custom die-cut sticker pack featuring your characters.
           </p>
         </div>
 
@@ -108,8 +108,8 @@ const App: React.FC = () => {
           <div className="lg:col-span-5 space-y-6 md:space-y-8">
             <div className="bg-white p-1.5 md:p-2 rounded-[2rem] shadow-sm border border-[#E6E6FA]">
                 <ImageUploader 
-                    onImageSelected={handleImageSelected} 
-                    selectedImage={state.originalImage} 
+                    onImagesChange={handleImagesChange} 
+                    selectedImages={state.originalImages} 
                 />
             </div>
             
@@ -118,7 +118,7 @@ const App: React.FC = () => {
               setPrompt={handlePromptChange} 
               onGenerate={handleGenerate}
               isGenerating={state.isGenerating}
-              disabled={!state.originalImage}
+              disabled={state.originalImages.length === 0}
             />
           </div>
 
@@ -150,7 +150,7 @@ const App: React.FC = () => {
                 <div className="bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-[#F0F0FF] hover:border-[#FFDAB9] transition-colors">
                     <div className="w-12 h-12 bg-[#F5F5FF] rounded-2xl flex items-center justify-center text-[#9370DB] mb-5 font-bold text-xl">1</div>
                     <h4 className="font-semibold text-[#4A4A6A] mb-3 text-lg">Clear Subjects</h4>
-                    <p className="text-[#8E8EA8] text-sm leading-relaxed">Use photos where the face is clearly visible. Good lighting helps the AI capture the micro-expressions.</p>
+                    <p className="text-[#8E8EA8] text-sm leading-relaxed">Use photos where the faces are clearly visible. Good lighting helps the AI capture the micro-expressions.</p>
                 </div>
                 <div className="bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-[#F0F0FF] hover:border-[#FFDAB9] transition-colors">
                     <div className="w-12 h-12 bg-[#FFF5EE] rounded-2xl flex items-center justify-center text-[#E9967A] mb-5 font-bold text-xl">2</div>
